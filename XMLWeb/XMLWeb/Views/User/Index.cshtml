@@ -1,0 +1,132 @@
+﻿@model XMLWeb.Models.User
+@{
+    ViewBag.Title = "Users";
+}
+<h1 class="display-4">@ViewBag.Title</h1>
+<table id="table1" class="table table-bordered">
+    <thead>
+        <tr>
+            <th>Id</th>
+            <th>First Name</th>
+            <th>Surname</th>
+            <th>Cell Phone Number</th>
+            <th>Action</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model.UserList)
+        {
+            <tr>
+                <td>@item.Id</td>
+                <td>@item.FirstName</td>
+                <td>@item.Surname</td>
+                <td>@item.CellPhone</td>
+                <td>
+                    <a href='#' data-id="@item.Id" data-toggle="modal" data-target="#userModel" onclick="GetDetails(@item.Id)"><i class="bi bi-eye-fill"></i></a>&nbsp;&nbsp;&nbsp;
+                    <a href='/User/Delete?Id=@item.Id' data-id="@item.Id" onclick="return ConfirmDelete()"><i class="bi bi-trash-fill"></i></a>&nbsp;
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<div class="modal fade" id="userModel" tabindex="-1" role="dialog" aria-labelledby="userModelTitle" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="userModelTitle">Manage User</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            @using (Html.BeginForm("Index", "User", FormMethod.Post))
+            {
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="exampleInputEmail1">First Name</label>
+                        @Html.HiddenFor(model => model.Id, new { id = "Id" })
+                        @Html.TextBoxFor(model => model.FirstName, new { @class = "form-control", @tabindex = "1", @Id = "FirstName", @maxlength = "30" })
+                        @Html.ValidationMessageFor(model => model.FirstName, "", new { @class = "text-danger  " })
+                    </div>
+                    <div class="form-group">
+                        <label for="exampleInputPassword1">Surname</label>
+                        @Html.TextBoxFor(model => model.Surname, new { @class = "form-control", @tabindex = "2", @Id = "Surname", @maxlength = "30" })
+                        @Html.ValidationMessageFor(model => model.Surname, "", new { @class = "text-danger  " })
+                    </div>
+                    <div class="form-group form-check">
+                        <label for="exampleInputPassword1">Cell Phone NUmber</label>
+                        @Html.TextBoxFor(model => model.CellPhone, new { @class = "form-control", @tabindex = "3", @Id = "CellPhone", @maxlength = "15", @type = "phone" })
+                        @Html.ValidationMessageFor(model => model.CellPhone, "", new { @class = "text-danger  " })
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="saveEdit btn btn-primary">Save changes</button>
+                    <button type="button" class="btn btn-default pull-right" data-dismiss="modal">Close</button>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+
+@section scripts
+{
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $("#btnAdd").click(function () {
+                debugger;
+                var count = $('#table1 tbody tr').length;
+                var $tr = $('#table1 tbody tr:first').clone();
+                var $trLast = $('#table1 tbody tr:last');
+                var isValid = "1";
+                $trLast.find('input').each(function () {
+                    var id = $(this).val();
+                    if (id == "") {
+                        alert("test");
+                        isValid = "0"
+                        return false;
+                    }
+                });
+                if (isValid == "1") {
+                    $tr.find('input').each(function () {
+                        var id = $(this).attr('id');
+                        id = id.substring(0, id.length - 1);
+                        $(this).attr('id', id + count);
+                    });
+                    count++;
+                    $('#table1').append($tr);
+                }
+            });
+        });
+
+        function GetDetails(id) {
+            $.ajax({
+                url: "/User/EditUser/" + id,
+                typr: "GET",
+                contentType: "application/json;charset=UTF-8",
+                dataType: "json",
+                success: function (response) {
+                    $('#Id').val(response.Id);
+                    $('#FirstName').val(response.FirstName);
+                    $('#Surname').val(response.Surname);
+                    $('#CellPhone').val(response.CellPhone);
+                    $('#userModel').modal('show');
+                },
+                error: function (response) {
+                    alert(response.responseText);
+                }
+            });
+            return false;
+        }
+
+        function ConfirmDelete() {
+            if (confirm('Are You Sure Want To Delete This User??')) {
+                return true;
+            } else {
+                return false;
+            }
+        }
+    </script>
+}
+
+

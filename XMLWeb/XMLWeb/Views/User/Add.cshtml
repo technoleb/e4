@@ -1,0 +1,123 @@
+﻿@model List<XMLWeb.Models.User>
+@{
+    ViewBag.Title = "Add Users";
+}
+<h2>@ViewBag.Title.</h2>
+
+
+@using (Html.BeginForm("Add", "User", FormMethod.Post, new { @id = "frmUser" }))
+{
+    <div class="row">
+        <table id="table1" class="table table-bordered">
+            <thead>
+                <tr>
+                    <th>First Name</th>
+                    <th>Surname</th>
+                    <th>CellPhone NUmber</th>
+                </tr>
+            </thead>
+            <tbody>
+                @for (int i = 0; i < Model.Count(); i++)
+                {
+                    @*@foreach (var item in Model)
+                        {*@
+                    <tr>
+                        <td>
+                            @Html.TextBoxFor(m => m[i].FirstName, new { @class = "form-control", @tabindex = "1", @Id = "FirstName" })
+                            @Html.ValidationMessageFor(m => m[i].FirstName, "", new { @class = "text-danger  " })
+                        </td>
+                        <td>
+                            @Html.TextBoxFor(m => m[i].Surname, new { @class = "form-control", @tabindex = "2", @Id = "Surname" })
+                            @Html.ValidationMessageFor(m => m[i].Surname, "", new { @class = "text-danger  " })
+                        </td>
+                        <td>
+                            @Html.TextBoxFor(m => m[i].CellPhone, new { @class = "form-control", @tabindex = "3", @Id = "CellPhone" })
+                            @Html.ValidationMessageFor(m => m[i].CellPhone, "", new { @class = "text-danger  " })
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+    <div class="row">
+        <div class="col-md-12 bg-light text-right">
+            <input type="button" id="btnAdd" value="Add Row" class="btn btn-success float-right" />
+            <input type="submit" id="submitData" value="Save Data" class="btn btn-primary float-right" />
+        </div>
+    </div>
+
+}
+@section scripts
+{
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $("#btnAdd").click(function () {
+                var count = $('#table1 tbody tr').length;
+                var $tr = $('#table1 tbody tr:first').clone();
+                var $trLast = $('#table1 tbody tr:last');
+                var isValid = "1";
+                $trLast.find('input').each(function () {
+                    var id = $(this).attr('id');
+                    var strValue = $(this).val();
+                    if (strValue == "") {
+                        if (id.startsWith('FirstName')) {
+                            alert("Please Enter First Name")
+                        }
+                        else if (id.startsWith('Surname')) {
+                            alert("Please Enter Surname")
+                        }
+                        else if (id.startsWith('CellPhone')) {
+                            alert("Please Enter Cell Phone Number")
+                        }
+
+                        isValid = "0"
+                        return false;
+                    }
+                });
+                if (isValid == "1") {
+                    $tr.find('input').each(function () {
+                        var id = $(this).attr('id');
+                        var name = $(this).attr('name');
+                        $(this).attr('id', id + count);
+                        $(this).attr('tabindex', count + 10);
+                        $(this).attr('name', name.replace('[0]', '[' + count + ']'));
+                        $(this).val("");
+                    });
+
+                    $tr.find('span').each(function () {
+                        var name = $(this).attr('data-valmsg-for');
+                        $(this).attr('data-valmsg-for', name.replace('[0]', '[' + count + ']'));
+                    });
+
+                    count++;
+                    $('#table1').append($tr);
+                    $('#btnAdd').attr('tabindex', count + 10);
+                    $('#FirstName' + count).focus();
+                }
+            });
+        });
+        $("#submitData").click(function () {
+            var $trLast = $('#table1 tbody tr:last');
+            var isValid = "1";
+            $trLast.find('input').each(function () {
+                var id = $(this).attr('id');
+                var strValue = $(this).val();
+                if (strValue == "") {
+                    if (id.startsWith('FirstName')) {
+                        alert("Please Enter First Name");
+                    }
+                    else if (id.startsWith('Surname')) {
+                        alert("Please Enter Surname");
+                    }
+                    else if (id.startsWith('CellPhone')) {
+                        alert("Please Enter Cell Phone Number");
+                    }
+                    isValid = "0"
+                    return false;
+                }
+            });
+            if (isValid == "1") { return true; }
+            else { return false; }
+        });
+    </script>
+}
